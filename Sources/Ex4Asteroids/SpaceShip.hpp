@@ -29,7 +29,7 @@ private:
     float rotationSpeed = 100.0f;
     glm::vec2 winSize;
 
-	std::vector<std::shared_ptr<Laser>> laserList;
+	//std::vector<std::shared_ptr<Laser>> laserList;
 	std::shared_ptr<sre::SpriteAtlas> spriteAtlas;
 };
 

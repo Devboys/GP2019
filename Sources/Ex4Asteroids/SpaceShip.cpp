@@ -44,27 +44,18 @@ void SpaceShip::update(float deltaTime) {
 		
 		sre::Sprite laserSprite = spriteAtlas->get("laserBlue01.png");
 		glm::vec2 shipDirection = glm::rotateZ(glm::vec3(0, 1, 0), glm::radians(rotation));
-		laserList.push_back(std::shared_ptr<Laser>(new Laser(shipDirection, position, laserSprite)));
+		children.push_back(std::shared_ptr<Laser>(new Laser(shipDirection, position, laserSprite)));
 	}
 
-	for each (std::shared_ptr<Laser> laser in laserList)
-	{
-		laser->update(deltaTime);
-	}
-
-	for (int i = laserList.size() - 1; i >= 0; i--) {
-		if (laserList[i]->isDestroyed()) {
-			laserList.erase(laserList.begin() + i);
-		}
-	}
+	GameObject::update(deltaTime);
 
 }
 
 void SpaceShip::render(sre::SpriteBatch::SpriteBatchBuilder& spriteBatchBuilder) {
 	GameObject::render(spriteBatchBuilder);
 
-	for (int i = 0; i < laserList.size(); i++) {
-		laserList[i]->render(spriteBatchBuilder);
+	for (int i = 0; i < children.size(); i++) {
+		children[i]->render(spriteBatchBuilder);
 	}
 }
 

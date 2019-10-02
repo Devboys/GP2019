@@ -8,6 +8,7 @@
 #include "GameObject.hpp"
 #include "SpaceShip.hpp"
 #include "Laser.hpp"
+#include "GameObjectList.hpp"
 
 
 using namespace sre;
@@ -24,11 +25,11 @@ AsteroidsGame::AsteroidsGame() {
     atlas = SpriteAtlas::create("asteroids.json","asteroids.png");
 
     auto spaceshipSprite = atlas->get("playerShip3_blue.png");
-    gameObjects.push_back(std::make_shared<SpaceShip>(spaceshipSprite, atlas));
+	GameObjectList::getInstance().gameObjects.push_back(std::make_shared<SpaceShip>(spaceshipSprite, atlas));
 
 	//AsteroidHandler is responsible for asteroid-objects on screen
 	asteroidHandler = std::shared_ptr<AsteroidHandler>(new AsteroidHandler(5, atlas));
-	gameObjects.push_back(asteroidHandler);
+	GameObjectList::getInstance().gameObjects.push_back(asteroidHandler);
 
 	//gameObjects.push_back(std::shared_ptr<Laser>(new Laser(glm::vec2(0, 1), glm::vec2(100, 100), atlas->get("laserBlue01.png"))));
 
@@ -50,8 +51,8 @@ AsteroidsGame::AsteroidsGame() {
 }
 
 void AsteroidsGame::update(float deltaTime) {
-	for (int i = 0; i < gameObjects.size();i++) {
-		gameObjects[i]->update(deltaTime);
+	for (int i = 0; i < GameObjectList::getInstance().gameObjects.size(); i++) {
+		GameObjectList::getInstance().gameObjects[i]->update(deltaTime);
     }
 }
 
@@ -78,15 +79,15 @@ void AsteroidsGame::render() {
             .build();
     auto spriteBatchBuilder = SpriteBatch::create();
 
-    for (int i = 0; i < gameObjects.size();i++) {
-        gameObjects[i]->render(spriteBatchBuilder);
+    for (int i = 0; i < GameObjectList::getInstance().gameObjects.size();i++) {
+		GameObjectList::getInstance().gameObjects[i]->render(spriteBatchBuilder);
     }
     auto spriteBatch = spriteBatchBuilder.build();
     renderPass.draw(spriteBatch);
 
     if (debugCollisionCircles){
         std::vector<glm::vec3> lines;
-        for (auto & go : gameObjects){
+        for (auto & go : GameObjectList::getInstance().gameObjects){
             auto col = std::dynamic_pointer_cast<Collidable>(go);
             if (col != nullptr){
                 drawCircle(lines, go->position, col->getRadius());
@@ -98,18 +99,28 @@ void AsteroidsGame::render() {
     ImGui::SetNextWindowPos(ImVec2(Renderer::instance->getWindowSize().x/2-100, .0f), ImGuiSetCond_Always);
     ImGui::SetNextWindowSize(ImVec2(200, 70), ImGuiSetCond_Always);
     ImGui::Begin("", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
-    ImGui::LabelText("GOs", "%i", (int)gameObjects.size() + asteroidHandler->numAsteroids());
+    ImGui::LabelText("GOs", "%i", GameObjectList::getInstance().gameObjects.size());
     ImGui::LabelText("Score", "%i",score);
     ImGui::End();
 }
 
 void AsteroidsGame::keyEvent(SDL_Event &event) {
-    for (int i = 0; i < gameObjects.size();i++) {
-        gameObjects[i]->onKey(event);
+    for (int i = 0; i < GameObjectList::getInstance().gameObjects.size();i++) {
+		GameObjectList::getInstance().gameObjects[i]->onKey(event);
     }
     if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_d){
         debugCollisionCircles = !debugCollisionCircles;
     }
+}
+
+
+int AsteroidsGame::getNumGameObjects(std::vector<std::shared_ptr<GameObject>> list) {
+	int n = 0; 
+	n += list.size();
+	for (int i = 0; i < list.size(); i++) {
+		n += getNumGameObjects(list[i]->children);
+	}
+	return n;
 }
 
 int main(){
