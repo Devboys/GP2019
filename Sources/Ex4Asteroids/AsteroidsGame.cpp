@@ -24,14 +24,7 @@ AsteroidsGame::AsteroidsGame() {
 
     atlas = SpriteAtlas::create("asteroids.json","asteroids.png");
 
-    auto spaceshipSprite = atlas->get("playerShip3_blue.png");
-	GameObjectList::getInstance().gameObjects.push_back(std::make_shared<SpaceShip>(spaceshipSprite, atlas));
-
-	//AsteroidHandler is responsible for asteroid-objects on screen
-	asteroidHandler = std::shared_ptr<AsteroidHandler>(new AsteroidHandler(5, atlas));
-	GameObjectList::getInstance().gameObjects.push_back(asteroidHandler);
-
-	//gameObjects.push_back(std::shared_ptr<Laser>(new Laser(glm::vec2(0, 1), glm::vec2(100, 100), atlas->get("laserBlue01.png"))));
+	initGame();
 
     camera.setWindowCoordinates();
 
@@ -50,10 +43,43 @@ AsteroidsGame::AsteroidsGame() {
     r.startEventLoop();
 }
 
+void AsteroidsGame::initGame() {
+	auto spaceshipSprite = atlas->get("playerShip3_blue.png");
+	GameObjectList::getInstance().gameObjects.push_back(std::make_shared<SpaceShip>(spaceshipSprite, atlas));
+
+	//AsteroidHandler is responsible for asteroid-objects on screen
+	auto asteroidHandler = std::shared_ptr<AsteroidHandler>(new AsteroidHandler(5, atlas));
+	GameObjectList::getInstance().gameObjects.push_back(asteroidHandler);
+}
+
 void AsteroidsGame::update(float deltaTime) {
+
+	//update all objects
 	for (int i = 0; i < GameObjectList::getInstance().gameObjects.size(); i++) {
 		GameObjectList::getInstance().gameObjects[i]->update(deltaTime);
     }
+
+	//call collision events for all objects
+	checkCollisions();
+
+	//remove destroyed objects
+	for (int j = GameObjectList::getInstance().gameObjects.size() - 1; j >= 0; j--) {
+		if (GameObjectList::getInstance().gameObjects[j]->isDestroyed()) {
+			GameObjectList::getInstance().gameObjects.erase(GameObjectList::getInstance().gameObjects.begin() + j);
+		}
+	}
+
+	//add new objects
+	if (GameObjectList::getInstance().gameObjects.size() != 0) {
+		GameObjectList::getInstance().gameObjects.insert (
+			GameObjectList::getInstance().gameObjects.end(), 
+			GameObjectList::getInstance().addedObjects.begin(), 
+			GameObjectList::getInstance().addedObjects.end()
+		);
+
+		GameObjectList::getInstance().addedObjects.clear();
+	}
+
 }
 
 void drawCircle(std::vector<glm::vec3>& lines, glm::vec2 position, float radius){
@@ -111,16 +137,35 @@ void AsteroidsGame::keyEvent(SDL_Event &event) {
     if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_d){
         debugCollisionCircles = !debugCollisionCircles;
     }
+	if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_r) {
+		std::cout << "restarting...\n";
+		GameObjectList::getInstance().gameObjects.clear();
+
+		initGame();
+	}
 }
 
+void AsteroidsGame::checkCollisions() {
+	for (int i = 0; i < GameObjectList::getInstance().gameObjects.size(); i++) {
 
-int AsteroidsGame::getNumGameObjects(std::vector<std::shared_ptr<GameObject>> list) {
-	int n = 0; 
-	n += list.size();
-	for (int i = 0; i < list.size(); i++) {
-		n += getNumGameObjects(list[i]->children);
+		glm::vec2 objectPos = GameObjectList::getInstance().gameObjects[i]->position;
+		auto object = std::dynamic_pointer_cast<Collidable>(GameObjectList::getInstance().gameObjects[i]);
+
+		if (object != nullptr) {
+			for (int j = 0; j < GameObjectList::getInstance().gameObjects.size(); j++) {
+				if (j == i) continue;
+				 glm::vec2 otherPos = GameObjectList::getInstance().gameObjects[j]->position;
+				auto other = std::dynamic_pointer_cast<Collidable>(GameObjectList::getInstance().gameObjects[j]);
+				if (other != nullptr) {
+					float dist = glm::length(otherPos - objectPos);
+					if (dist < object->getRadius() || dist < other->getRadius()) {
+						object->onCollision(GameObjectList::getInstance().gameObjects[j]);
+					}
+				}
+
+			}
+		}
 	}
-	return n;
 }
 
 int main(){

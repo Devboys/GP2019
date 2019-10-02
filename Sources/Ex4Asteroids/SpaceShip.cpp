@@ -5,6 +5,9 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include "SpaceShip.hpp"
 #include "sre/Renderer.hpp"
+#include "GameObjectList.hpp"
+#include "Asteroid.hpp"
+#include "bang.hpp"
 
 SpaceShip::SpaceShip(const sre::Sprite &sprite, std::shared_ptr<sre::SpriteAtlas> atlas) : GameObject(sprite) {
     scale = glm::vec2(0.5f,0.5f);
@@ -44,23 +47,17 @@ void SpaceShip::update(float deltaTime) {
 		
 		sre::Sprite laserSprite = spriteAtlas->get("laserBlue01.png");
 		glm::vec2 shipDirection = glm::rotateZ(glm::vec3(0, 1, 0), glm::radians(rotation));
-		children.push_back(std::shared_ptr<Laser>(new Laser(shipDirection, position, laserSprite)));
+		GameObjectList::getInstance().addedObjects.push_back(std::shared_ptr<Laser>(new Laser(shipDirection, position, laserSprite, 10)));
 	}
 
-	GameObject::update(deltaTime);
-
-}
-
-void SpaceShip::render(sre::SpriteBatch::SpriteBatchBuilder& spriteBatchBuilder) {
-	GameObject::render(spriteBatchBuilder);
-
-	for (int i = 0; i < children.size(); i++) {
-		children[i]->render(spriteBatchBuilder);
-	}
 }
 
 void SpaceShip::onCollision(std::shared_ptr<GameObject> other) {
-
+	if(std::dynamic_pointer_cast<Asteroid>(other) != nullptr){
+		this->destroyed = true;
+		sre::Sprite bangSprite = spriteAtlas->get("bang.png");
+		GameObjectList::getInstance().addedObjects.push_back(std::shared_ptr<Bang>(new Bang(position, bangSprite)));
+	}
 }
 
 void SpaceShip::onKey(SDL_Event &keyEvent) {

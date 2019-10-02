@@ -23,10 +23,8 @@ protected:
     glm::vec2 scale;
     sre::Sprite sprite;
     float rotation;
-	bool visible;
+	bool visible = true;
 	bool destroyed;
-
-	std::vector<std::shared_ptr<GameObject>> children;
 
     friend class AsteroidsGame;
 };

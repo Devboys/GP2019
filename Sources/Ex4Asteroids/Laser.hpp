@@ -1,13 +1,16 @@
 #pragma once
 #include "GameObject.hpp"
 #include "sre/Sprite.hpp"
+#include "Collidable.hpp"
 
-class Laser : public GameObject{
+class Laser : public GameObject, public Collidable{
 
 public:
-	Laser(glm::vec2 direction, glm::vec2 poss, sre::Sprite sprite);
+	Laser(glm::vec2 direction, glm::vec2 poss, sre::Sprite sprite, float radius);
 
 	void update(float deltaTime);
+
+	void onCollision(std::shared_ptr<GameObject> other);
 
 private:
 	glm::vec2 direction;

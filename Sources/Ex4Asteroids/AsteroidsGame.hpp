@@ -14,15 +14,15 @@ private:
     void update(float deltaTime);
     void render();
     void keyEvent(SDL_Event &event);
-	int getNumGameObjects(std::vector<std::shared_ptr<GameObject>> list);
+	void initGame();
 
     sre::Camera camera;
     sre::SDLRenderer r;
     std::shared_ptr<sre::SpriteAtlas> atlas;
-    //std::vector<std::shared_ptr<GameObject>> gameObjects;
     bool debugCollisionCircles = false;
     int score = 0;
-	std::shared_ptr<AsteroidHandler> asteroidHandler;
+
+	void checkCollisions();
 
 };
 

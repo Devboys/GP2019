@@ -15,8 +15,6 @@ public:
 
     void onKey(SDL_Event &keyEvent) override;
 
-	void render(sre::SpriteBatch::SpriteBatchBuilder& spriteBatchBuilder);
-
     glm::vec2 velocity;
 private:
     bool rotateCW = false;

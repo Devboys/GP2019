@@ -1,12 +1,12 @@
 #include "AsteroidHandler.hpp"
 #include "iostream"
 #include "sre/Renderer.hpp"
+#include "GameObjectList.hpp"
 
-AsteroidHandler::AsteroidHandler(int numAsteroids, std::shared_ptr<sre::SpriteAtlas> atlas)
+AsteroidHandler::AsteroidHandler(int numAsteroids, std::shared_ptr<sre::SpriteAtlas> atlas) 
 {
+	visible = false;
 	numInitAsteroids = numAsteroids;
-	sre::Sprite asteroidSprite = atlas->get("meteorBrown_big4.png");
-
 	//spawn asteroids in random positions on the screen.
 	for (int i = 0; i < numInitAsteroids; i++)
 	{
@@ -16,7 +16,8 @@ AsteroidHandler::AsteroidHandler(int numAsteroids, std::shared_ptr<sre::SpriteAt
 		glm::vec2 asteroidPos = glm::vec2(randX, randY);
 
 		//only asteroids in asteroidList are updated/rendered, so add them.
-		auto asteroid = std::shared_ptr<Asteroid>(new Asteroid(asteroidPos, asteroidSprite, 10.0f));
-		children.push_back(asteroid);
+		auto velocity = glm::vec2(-80 + rand() %  161, -80 + rand() % 161);
+		auto asteroid = std::shared_ptr<Asteroid>(new Asteroid(asteroidPos, velocity, Asteroid::asteroidType::big, atlas));
+		GameObjectList::getInstance().addedObjects.push_back(asteroid);
 	}
 }
