@@ -1,1 +1,2 @@
 add_subdirectory(ExSes2)
+add_subdirectory(Ex4Asteroids)
