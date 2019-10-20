@@ -18,8 +18,8 @@ Wolf3D::Wolf3D()
     init();
 
     // Enable mouse lock
-    // SDL_SetWindowGrab(r.getSDLWindow(),SDL_TRUE);
-    // SDL_SetRelativeMouseMode(SDL_TRUE);
+     SDL_SetWindowGrab(r.getSDLWindow(),SDL_TRUE);
+     SDL_SetRelativeMouseMode(SDL_TRUE);
 
 
     r.frameUpdate = [&](float deltaTime){
@@ -68,24 +68,70 @@ void Wolf3D::render() {
 // The cube must be centered at (x,0,z)
 // The texturing
 void Wolf3D::addCube(std::vector<glm::vec3>& vertexPositions, std::vector<glm::vec4>& textureCoordinates, int x, int z, int type){
-    // todo implement this
 
-    // Incomplete implementation - creates two triangles in the xy-plane
-    vertexPositions.insert(vertexPositions.end(),{
-            glm::vec3(-0.5,-0.5,0.5), glm::vec3(0.5,-0.5,0.5), glm::vec3(-0.5,0.5,0.5),
-            glm::vec3(0.5,0.5,0.5), glm::vec3(-0.5,0.5,0.5), glm::vec3(0.5,-0.5,0.5)
+	cout << type;
+
+	using namespace glm;
+	//define all verts in cube
+	vec3 v[8];
+	//Vertex coordinates				// Vertices on hypothetical cube.
+	v[0] = vec3(-0.5, -0.5,  0.5);		// 
+    v[1] = vec3( 0.5, -0.5,  0.5);		//		   5-------7
+	v[2] = vec3( 0.5,  0.5,  0.5);		//		  /|      /|
+	v[3] = vec3(-0.5,  0.5,  0.5);		//		 / |     / |
+	v[4] = vec3(-0.5, -0.5, -0.5);		//		3--+----2  |
+	v[5] = vec3(-0.5,  0.5, -0.5);		//		|  4----|--6
+	v[6] = vec3( 0.5, -0.5, -0.5);		//		| /     | /
+	v[7] = vec3( 0.5,  0.5, -0.5);		//		0-------1
+
+	//center cube at (x,0,z)
+	for each (vec3 &vert in v) {
+		vert.x += x;
+		vert.z += z;
+	}
+
+	vertexPositions.insert(vertexPositions.end(), {
+		//front face
+		v[0], v[1], v[2],
+		v[2], v[3], v[0],
+		//back face
+		v[6], v[4], v[5],
+		v[5], v[7], v[6],
+		//left face
+		v[4], v[0], v[3],
+		v[3], v[5], v[4],
+		//right face
+		v[1], v[6], v[7],
+		v[7], v[2], v[1]
     });
 
     glm::vec2 textureSize(2048,4096);
     glm::vec2 tileSize(64,64);
     glm::vec2 tileSizeWithBorder(65,65);
+	
+	vec2 texIndex = vec2((type % 8) *  2, type / 8);
 
-    glm::vec2 min = vec2(0,42*tileSizeWithBorder.y) / textureSize;
+	//texture front- and back-face (xy plane)
+    glm::vec2 min = vec2(texIndex.x * tileSizeWithBorder.x,(42 - texIndex.y)*tileSizeWithBorder.y) / textureSize;
     glm::vec2 max = min+tileSize / textureSize;
-    textureCoordinates.insert(textureCoordinates.end(),{
-            glm::vec4(min.x,min.y,0,0), glm::vec4(max.x,min.y,0,0), glm::vec4(min.x,max.y,0,0),
-            glm::vec4(max.x,max.y,0,0), glm::vec4(min.x,max.y,0,0), glm::vec4(max.x,min.y,0,0)
-    });
+	for (int i = 0; i < 2; i++) {
+		//all vertices were defined in identical order (relative to front-face) so no difference between relative texture-coords.
+		textureCoordinates.insert(textureCoordinates.end(), {
+			glm::vec4(min.x,min.y,0,0), glm::vec4(max.x,min.y,0,0), glm::vec4(max.x,max.y,0,0),
+			glm::vec4(max.x,max.y,0,0), glm::vec4(min.x,max.y,0,0), glm::vec4(min.x,min.y,0,0),
+			});
+	}
+
+	//texture left- and right-face (yz plane)
+	min = vec2((texIndex.x + 1) * tileSizeWithBorder.x, (42 - texIndex.y)*tileSizeWithBorder.x) / textureSize;
+	max = min + tileSize / textureSize;
+	for (int i = 0; i < 2; i++) {
+		//all vertices were defined in identical order (relative to front-face) so no difference between relative texture-coords.
+		textureCoordinates.insert(textureCoordinates.end(), {
+			glm::vec4(min.x,min.y,0,0), glm::vec4(max.x,min.y,0,0), glm::vec4(max.x,max.y,0,0),
+			glm::vec4(max.x,max.y,0,0), glm::vec4(min.x,max.y,0,0), glm::vec4(min.x,min.y,0,0),
+			});
+	}
 }
 
 void Wolf3D::init() {
@@ -102,7 +148,7 @@ void Wolf3D::init() {
     std::vector<glm::vec4> textureCoordinates;
 
     for (int x=0;x<map.getWidth();x++){
-        for (int y=0;y<map.getHeight();y++){
+        for (int y=0;y<map.getHeight();y++){ 
             int field = map.getTile(x,y);
             if (field != -1){
                 addCube(vertexPositions,textureCoordinates,x,y,field);

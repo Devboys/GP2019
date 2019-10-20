@@ -20,10 +20,19 @@ public:
 private:
     sre::Camera * camera;
 
-    // todo remove
-    bool fwd;
-    bool bwd;
-    bool left;
-    bool right;
+	struct MoveState {
+		bool UP;
+		bool DOWN;
+		bool LEFT;
+		bool RIGHT;
+
+		MoveState() {
+			UP = DOWN = LEFT = RIGHT = false;
+		}
+	};
+
+	MoveState mState;
+	float moveSpeed = 2;
+	float lookSensitivity = 0.1f;
 };
 
