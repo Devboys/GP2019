@@ -26,5 +26,9 @@ private:
     bool debugBricks = true;
     bool lockRotation = false;
 
+	std::shared_ptr<sre::Mesh> floor;
+	std::shared_ptr<sre::Material> floorMat;
+	std::shared_ptr<sre::Mesh> ceil;
+	std::shared_ptr<sre::Material> ceilMat;
 };
 

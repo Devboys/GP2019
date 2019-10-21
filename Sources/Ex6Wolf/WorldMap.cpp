@@ -12,15 +12,6 @@
 using namespace std;
 
 void WorldMap::loadMap(std::string filename) {
-    // todo implement json loading this instead following
-    //values.push_back( { 0, 0, 0,0} ); // -------> x
-    //values.push_back( { 0,-1,-1,2} ); // |
-    //values.push_back( { 0,-1,-1,9} ); // |
-    //values.push_back( { 0, 0, 0,0} ); // v z
-    //startingPosition.x = 1.5;
-    //startingPosition.y = 1.5;
-    //startingRotation = 22.5;
-
      using namespace rapidjson;
      ifstream fis(filename);
      IStreamWrapper isw(fis);
@@ -36,18 +27,15 @@ void WorldMap::loadMap(std::string filename) {
 		 }
 		 values.push_back(row);
 	 }
-
-	 //DEBUG
-	 for(auto &x : values) {
-		 for (auto &y : x) {
-			 cout << ((y == -1) ? 0 : y);
-		 }
-		 cout << "\n";
-	 }
-
 	 startingPosition.x = d["spawn"]["x"].GetFloat();
 	 startingPosition.y = d["spawn"]["y"].GetFloat();
 	 startingRotation = d["spawn"]["angle"].GetInt();
+
+	 auto &temp = d["floorColor"].GetArray();
+	 floorColor = glm::vec4(temp[0].GetFloat(), temp[1].GetFloat(), temp[2].GetFloat(), temp[3].GetFloat());
+	 
+	 temp = d["ceilColor"].GetArray();
+	 ceilColor = glm::vec4(temp[0].GetFloat(), temp[1].GetFloat(), temp[2].GetFloat(), temp[3].GetFloat());
 }
 
 int WorldMap::getTile(int x, int y) {

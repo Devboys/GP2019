@@ -49,6 +49,8 @@ void Wolf3D::render() {
             .build();
 
     renderPass.draw(walls, glm::mat4(1), wallMaterial);
+	renderPass.draw(floor, glm::mat4(1), floorMat);
+	renderPass.draw(ceil, glm::mat4(1), ceilMat);
 
     if (debugBricks){
         renderDebugBricks(renderPass);
@@ -66,11 +68,7 @@ void Wolf3D::render() {
 
 // Creates a textured cube with a side length of 1 (e.g. from -0.5 to 0.5).
 // The cube must be centered at (x,0,z)
-// The texturing
 void Wolf3D::addCube(std::vector<glm::vec3>& vertexPositions, std::vector<glm::vec4>& textureCoordinates, int x, int z, int type){
-
-	cout << type;
-
 	using namespace glm;
 	//define all verts in cube
 	vec3 v[8];
@@ -147,6 +145,7 @@ void Wolf3D::init() {
     std::vector<glm::vec3> vertexPositions;
     std::vector<glm::vec4> textureCoordinates;
 
+	//Add map models.
     for (int x=0;x<map.getWidth();x++){
         for (int y=0;y<map.getHeight();y++){ 
             int field = map.getTile(x,y);
@@ -162,6 +161,40 @@ void Wolf3D::init() {
             .withPositions(vertexPositions)
             .withUVs(textureCoordinates)
             .build();
+
+	//add floor and roof quads
+	vec3 fV[4];
+	fV[0] = vec3(-10, -0.5, 10);
+	fV[1] = vec3(10, -0.5, 10);
+	fV[2] = vec3(10, -0.5, -10);
+	fV[3] = vec3(-10, -0.5, -10);
+
+	floorColor = map.getFloorColor();
+	ceilColor = map.getCeilColor();
+
+	std::vector<glm::vec3> floorPositions;
+	floorPositions.insert(floorPositions.end(), {
+		fV[0], fV[1], fV[2],
+		fV[2], fV[3], fV[0]
+	});
+
+	floor = Mesh::create().withPositions(floorPositions).build();
+	floorMat = Shader::getUnlit()->createMaterial();
+	floorMat->setColor(sre::Color(floorColor.x, floorColor.y, floorColor.z, floorColor.w));
+
+	for (vec3 &vertex : fV) {
+		vertex.y += 1;
+	}
+
+	std::vector<glm::vec3> ceilPositions;
+	ceilPositions.insert(ceilPositions.end(), {
+		fV[0], fV[3], fV[2],
+		fV[2], fV[1], fV[0]
+		});
+
+	ceil = Mesh::create().withPositions(ceilPositions).build();
+	ceilMat = Shader::getUnlit()->createMaterial();
+	ceilMat->setColor(sre::Color(ceilColor.x, ceilColor.y, ceilColor.z, ceilColor.w));
 }
 
 void Wolf3D::renderDebugBricks(RenderPass & renderPass){
