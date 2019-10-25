@@ -163,36 +163,38 @@ void Wolf3D::init() {
             .build();
 
 	//add floor and roof quads
-	vec3 fV[4];
-	fV[0] = vec3(-10, -0.5, 10);
-	fV[1] = vec3(10, -0.5, 10);
-	fV[2] = vec3(10, -0.5, -10);
-	fV[3] = vec3(-10, -0.5, -10);
-
 	floorColor = map.getFloorColor();
 	ceilColor = map.getCeilColor();
+	vec3 v[4];
+	v[0] = vec3(-10, -0.5, 10);
+	v[1] = vec3(10, -0.5, 10);
+	v[2] = vec3(10, -0.5, -10);
+	v[3] = vec3(-10, -0.5, -10);
 
-	std::vector<glm::vec3> floorPositions;
-	floorPositions.insert(floorPositions.end(), {
-		fV[0], fV[1], fV[2],
-		fV[2], fV[3], fV[0]
+	std::vector<glm::vec3> floorVerts;
+	floorVerts.insert(floorVerts.end(), {
+		v[0], v[1], v[2],
+		v[2], v[3], v[0]
 	});
-
-	floor = Mesh::create().withPositions(floorPositions).build();
+	floor = Mesh::create()
+		.withPositions(floorVerts)
+		.build();
 	floorMat = Shader::getUnlit()->createMaterial();
 	floorMat->setColor(sre::Color(floorColor.x, floorColor.y, floorColor.z, floorColor.w));
 
-	for (vec3 &vertex : fV) {
+	//ceiling verts are directly above floor verts, so simply use offset.
+	for (vec3 &vertex : v) {
 		vertex.y += 1;
 	}
-
-	std::vector<glm::vec3> ceilPositions;
-	ceilPositions.insert(ceilPositions.end(), {
-		fV[0], fV[3], fV[2],
-		fV[2], fV[1], fV[0]
+	//Front-face of ceiling is inverse of floor, so use inverted indices for wind-order.
+	std::vector<glm::vec3> ceilVerts;
+	ceilVerts.insert(ceilVerts.end(), {
+		v[0], v[3], v[2],
+		v[2], v[1], v[0]
 		});
-
-	ceil = Mesh::create().withPositions(ceilPositions).build();
+	ceil = Mesh::create()
+		.withPositions(ceilVerts)
+		.build();
 	ceilMat = Shader::getUnlit()->createMaterial();
 	ceilMat->setColor(sre::Color(ceilColor.x, ceilColor.y, ceilColor.z, ceilColor.w));
 }
