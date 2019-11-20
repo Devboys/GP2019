@@ -17,3 +17,8 @@ SET(A_USE_EX_8 ON CACHE BOOL "Enable Exercise 8")
 if(A_USE_EX_8)
 	add_subdirectory(Ex8Bird)
 endif(A_USE_EX_8)
+
+SET(A_USE_EX_10 ON CACHE BOOL "Enable Exercise 10")
+if(A_USE_EX_10)
+	add_subdirectory(Ex10Platformer)
+endif(A_USE_EX_10)
