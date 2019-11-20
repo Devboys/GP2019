@@ -29,6 +29,7 @@ public:
     static BirdGame* instance;
 
     void setGameState(GameState newState);
+	GameState BirdGame::getGameState();
 private:
     sre::SDLRenderer r;
 

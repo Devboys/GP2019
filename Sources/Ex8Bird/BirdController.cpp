@@ -12,20 +12,34 @@
 #include "SpriteComponent.hpp"
 
 BirdController::BirdController(GameObject *gameObject) : Component(gameObject) {
-    // initiate bird physics
+	//This controller only interacts with physics-component so cache this pointer for future reference.
+	_physComp = this->getGameObject()->getComponent<PhysicsComponent>();
+
+	//define starting parameters for physics simulation
+	_physComp->setLinearVelocity(glm::vec2(moveSpeed, 0));
 }
 
 bool BirdController::onKey(SDL_Event &event) {
-    if (event.type == SDL_KEYDOWN){
-        std::cout << "some key pressed" << std::endl;
-    } else if (event.type == SDL_KEYUP){
-        std::cout << "some key released" << std::endl;
+    if (event.type == SDL_KEYDOWN && BirdGame::instance->getGameState() == GameState::Running){
+		if (event.key.keysym.sym == SDLK_SPACE) {
+			
+			_physComp->getLinearVelocity().x;
+			_physComp->addImpulse(glm::vec2(0, flapStrength));
+		}
     }
     return false;
 }
 
 void BirdController::onCollisionStart(PhysicsComponent *comp) {
-    std::cout << "bird collided with something" << std::endl;
+	
+	std::string name = comp->getGameObject()->name;
+
+	if (name == "Coin") {
+		comp->getGameObject()->destroyed = true;
+	}
+	else if (name == "Wall top" || name == "Wall bottom") {
+		BirdGame::instance->setGameState(GameState::GameOver);
+	}
 }
 
 void BirdController::onCollisionEnd(PhysicsComponent *comp) {

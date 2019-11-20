@@ -35,6 +35,7 @@ public:
     const std::vector<std::shared_ptr<Component>>& getComponents();
 
     std::string name = "_";
+	bool destroyed;
 private:
     GameObject() = default;
     std::vector<std::shared_ptr<Component>> components;
