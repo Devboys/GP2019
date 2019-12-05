@@ -1,3 +1,6 @@
 [submodule "SimpleRenderEngineProject"]
 	path = SimpleRenderEngineProject
 	url = https://github.com/mortennobel/SimpleRenderEngineProject.git
+[submodule "Sources/LightOfTheMoon"]
+	path = Sources/LightOfTheMoon
+	url = https://github.itu.dk/algi/Codename-LightOfTheMoon.git
