@@ -125,22 +125,23 @@ void PlatformerGame::initLevel() {
     sBirdSpriteComponent->setSprite(sBird);
     spiralBirdObj->setPosition(glm::vec2(100, 200));
 
-    //TODO: assignment - Uncomment and add this ScriptComponent for exercise 10-4 and extend the ScriptComponent with the relevant functions from GameObject.
-    /* //REMOVE THIS BLOCK COMMENT
     auto script = spiralBirdObj->addComponent<ScriptComponent>();
 
-     // TODO: assignment - update radius continuously in the lua script so that the bird flies in a spiral with radius between [10, 100]
+	//Movement is not exactly a spiral. I'm bad at integral math and its 30 min before hand-in time so this movement is what you're getting ;)
     std::string luaScript =
             "radius = 100\n"
+			"cumulativeTime = 0; \n" //cumulative time variable
             "-- Function evaluated for each update\n"
             "function update (time) \n"
+			"   cumulativeTime = cumulativeTime + time \n" //accumulating time
             "   gameobj = getGameObject() \n"
             "   rot = gameobj:getRotation()\n"
             "   rot = (rot + 250 * time ) % (360) \n"
             "   gameobj:setRotation(rot) \n"
             "   pos = { x = 300, y = 400} \n"
-            "   pos.x = pos.x + math.sin(math.pi/180 * rot) * radius \n"
-            "   pos.y = pos.y - math.cos(math.pi/180 * rot) * radius \n"
+			"   effectiveRadius = radius * math.sin(cumulativeTime) \n" //radius of rotation.
+            "   pos.x = pos.x + math.sin(math.pi/180 * rot) * effectiveRadius \n"
+            "   pos.y = pos.y - math.cos(math.pi/180 * rot) * effectiveRadius \n"
             "   gameobj:setPosition(vec2.new(pos.x, pos.y)) \n"
             "end\n"
             "-- Key down handler example \n"
@@ -156,7 +157,7 @@ void PlatformerGame::initLevel() {
             "end\n";
 
     script->init(luaScript);
-    */
+    
 
     level->generateLevel();
 }

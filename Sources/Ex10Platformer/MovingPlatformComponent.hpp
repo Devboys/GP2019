@@ -16,8 +16,12 @@ public:
     void update(float deltaTime) override;
 
 private:
+	float QuadEaseInOut(float time, float start, float change, float duration);
+
     float totalTime = 0;
     glm::vec2 movementStart = glm::vec2(0,0);
     glm::vec2 movementEnd = glm::vec2(0,0);
     std::shared_ptr<PlatformComponent> platformComponent;
+
+	float platformMoveDuration = 2;
 };

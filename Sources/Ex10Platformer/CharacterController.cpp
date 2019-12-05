@@ -10,6 +10,7 @@
 #include "PhysicsComponent.hpp"
 #include "PlatformerGame.hpp"
 #include "SpriteComponent.hpp"
+#include "math.h" //for fmod
 
 CharacterController::CharacterController(GameObject *gameObject) : Component(gameObject) {
     characterPhysics = gameObject->addComponent<PhysicsComponent>();
@@ -21,6 +22,7 @@ CharacterController::CharacterController(GameObject *gameObject) : Component(gam
     characterPhysics->fixRotation();
     spriteComponent = gameObject->getComponent<SpriteComponent>();
 
+	totalTime = 0.0f;
 }
 
 bool CharacterController::onKey(SDL_Event &event) {
@@ -64,11 +66,10 @@ void CharacterController::update(float deltaTime) {
     }
     float accelerationSpeed = 0.010f;
     characterPhysics->addImpulse(movement*accelerationSpeed);
-    float maximumVelocity = 2;
     auto linearVelocity = characterPhysics->getLinearVelocity();
     float currentVelocity = linearVelocity.x;
-    if (abs(currentVelocity) > maximumVelocity){
-        linearVelocity.x = glm::sign(linearVelocity.x)*maximumVelocity;
+    if (abs(currentVelocity) > maxVelocity){
+        linearVelocity.x = glm::sign(linearVelocity.x)*maxVelocity;
         characterPhysics->setLinearVelocity(linearVelocity);
     }
     updateSprite(deltaTime);
@@ -103,7 +104,45 @@ void CharacterController::setSprites(sre::Sprite standing, sre::Sprite walk1, sr
 
 void CharacterController::updateSprite(float deltaTime) {
     auto velocity = characterPhysics->getLinearVelocity();
-    // todo implement
+
+	float normalizedVelocity = abs(velocity.x) / maxVelocity;
+	totalTime += deltaTime * normalizedVelocity; //animation time ticks slower when player is slow.
+
+	if (velocity.x == 0) { //standing character uses standing sprite
+		spriteComponent->setSprite(standing);
+	}
+	else if (isGrounded) { //grounded moving character uses walk sprites
+		if (fmod(totalTime, animationTime*2) > animationTime) {
+			spriteComponent->setSprite(walk1);
+		}
+		else {
+			spriteComponent->setSprite(walk2);
+		}
+	}
+
+	//jumping character uses jump sprites
+	if (velocity.y > 0) { //going up
+		spriteComponent->setSprite(flyUp);
+	}
+	else if (velocity.y == 0 && !isGrounded) { //flying
+		spriteComponent->setSprite(fly);
+	}
+	else if (velocity.y < 0) { //going down
+		spriteComponent->setSprite(flyDown);
+	}
+
+
+
+	//flip player
+	glm::bvec2 flip = glm::bvec2(left, false);
+
+	walk1.setFlip(flip);
+	walk2.setFlip(flip);
+	flyUp.setFlip(flip);
+	fly.setFlip(flip);
+	flyDown.setFlip(flip);
+	//spriteComponent->getSprite().setFlip(glm::bvec2(true, false)); //this didnt work...
+
 }
 
 

@@ -45,4 +45,8 @@ private:
     float radius;
     bool left = false;
     bool right = false;
+	float maxVelocity = 2;
+	//walk animation
+	double totalTime; //total object lifetime
+	float animationTime = 0.1f; //time between two animation frames at max speed;
 };

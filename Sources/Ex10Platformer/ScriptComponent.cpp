@@ -24,8 +24,10 @@ ScriptComponent::ScriptComponent(GameObject *gameObject) : Component(gameObject)
 
                 //functions
                 "setPosition", &GameObject::setPosition,
-                "getPosition", &GameObject::getPosition
-                //TODO: assignment - implement the variables and functions you need from GameObject.
+                "getPosition", &GameObject::getPosition,
+
+				"getRotation", &GameObject::getRotation,
+				"setRotation", &GameObject::setRotation
     );
 
     auto vec2_type = lua.new_usertype<glm::vec2> ("vec2",
@@ -57,7 +59,10 @@ ScriptComponent::ScriptComponent(GameObject *gameObject) : Component(gameObject)
         return getGameObject();
     });
 
-    //TODO: You may want to extend this with functionality in Lua to Find other game objects in the scene.
+	//primitive debug method in lua script
+	lua.set_function("debugPrint", [&](string message)->void {
+		std::cout << message;
+		});
 }
 
 bool ScriptComponent::init(string luaScript, bool isFilename) {
